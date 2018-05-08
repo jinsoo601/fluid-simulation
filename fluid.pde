@@ -25,6 +25,7 @@ void setup() {
   background(0);
   noStroke();
   size(gridSize * pixelSize, gridSize * pixelSize);
+  // size(window.innerWidth, window.innerHeight)
 
   initColor();
   initVelocity();
@@ -214,19 +215,27 @@ void advectVelocity() {
   }
 }
 
+// void initColor() {
+//   for (int i = 0; i < gridSize; i++) {
+//     for (int j = 0; j < gridSize; j++) {
+//       int x = floor(i / 16.0);
+//       int y = floor(j / 16.0);
+//       int mod = (x + y) % 2;
+//       if (mod == 0) {
+//         prevColor[i][j] = color(255, 255, 255);
+//         currentColor[i][j] = color(255, 255, 255);
+//       } else {
+//         prevColor[i][j] = color(0, 0, 0);
+//         currentColor[i][j] = color(0, 0, 0);
+//       }
+//     }
+//   }
+// }
 void initColor() {
   for (int i = 0; i < gridSize; i++) {
     for (int j = 0; j < gridSize; j++) {
-      int x = floor(i / 16.0);
-      int y = floor(j / 16.0);
-      int mod = (x + y) % 2;
-      if (mod == 0) {
-        prevColor[i][j] = color(255, 255, 255);
-        currentColor[i][j] = color(255, 255, 255);
-      } else {
-        prevColor[i][j] = color(0, 0, 0);
-        currentColor[i][j] = color(0, 0, 0);
-      }
+      prevColor[i][j] = color(0, 0, 0);
+      currentColor[i][j] = color(0, 0, 0);
     }
   }
 }
@@ -251,11 +260,18 @@ void initPressure() {
   }
 }
 
+color randomColor;
+
+void mousePressed() {
+  randomColor = color((int) 255 * random(), (int) 255 * random(), (int) 255 * random());
+}
+
 void addForces() {
   boolean mouseMoved = (mouseX != pmouseX) || (mouseY != pmouseY);
+  int x, y;
   if (mousePressed && mouseMoved) {
-    int x = (gridSize * mouseY) / height;
-    int y = (gridSize * mouseX) / width;
+    x = (gridSize * mouseY) / height;
+    y = (gridSize * mouseX) / width;
 
     addForce(uPrev, x, y, x - previousMouseX, FORCE_RADIUS);
     addForce(vPrev, x, y, y - previousMouseY, FORCE_RADIUS);
@@ -268,15 +284,18 @@ void addForces() {
 void addForce(float[][] field, int x, int y, float diff, float radius) {
   int i,j, dx, dy;
   float f;
-
-    for ( i = int(clamp(x-radius, 0, gridSize - 1)); i <= int(clamp(x+radius, 0 , gridSize - 1)); i++ ) {
-      dx = x - i;
-      for ( j = int(clamp(y-radius, 0, gridSize - 1)); j <= int(clamp(y+radius, 0, gridSize - 1)); j++ ) {
-        dy = y - j;
-        f = 1 - ( sqrt(dx*dx + dy*dy) / radius );
-        field[i][j] += clamp(f,0,1) * diff;
+  for ( i = int(clamp(x-radius, 0, gridSize - 1)); i <= int(clamp(x+radius, 0 , gridSize - 1)); i++ ) {
+    dx = x - i;
+    for ( j = int(clamp(y-radius, 0, gridSize - 1)); j <= int(clamp(y+radius, 0, gridSize - 1)); j++ ) {
+      dy = y - j;
+      f = 1 - ( sqrt(dx*dx + dy*dy) / radius );
+      field[i][j] += clamp(f, 0, 1) * diff;
+      // currentColor[i][j] = color(red(randomColor) * clamp(f, 0, 1), green(randomColor) * clamp(f, 0, 1), blue(randomColor) * clamp(f, 0, 1));
+      if (sqrt(dx*dx + dy*dy) < radius) {
+        currentColor[i][j] = randomColor;
       }
     }
+  }
 }
 
 void drawColor() {
